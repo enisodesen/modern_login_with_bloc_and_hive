@@ -1,16 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:modern_login_page/screens/signup_page.dart';
+import 'package:modern_login_page/screens/user_list.dart';
+import 'package:modern_login_page/widgets/custom_snackbar.dart';
 
+import '../hive/user.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/square_tile.dart';
+import 'grideview_page.dart';
 
-class LoginPage extends StatelessWidget {
-  LoginPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  void signUserIn() {}
+  late List<User> _users;
+  late Box<User> _box;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _box = Hive.box<User>('userBox');
+    _users = _box.values.toList();
+  }
+
+  void signUserIn(
+    BuildContext context,
+    String usernameController,
+    String passwordController,
+  ) {
+    final user = _users
+        .where((user) =>
+            user.username == _usernameController.text &&
+            user.password == _passwordController.text)
+        .toList();
+    if (usernameController == 'admin' && passwordController == '12345') {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const UserList(),
+          ));
+    } else if (user.isNotEmpty) {
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const GrideViewPage()));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const CustomSnackBar(
+          content: Text(
+        'Invalid username or password',
+        textAlign: TextAlign.center,
+      )));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +133,11 @@ class LoginPage extends StatelessWidget {
 
               //sign in
 
-              CustomButton(onTapped: signUserIn),
+              CustomButton(
+                text: 'Sign In',
+                onTapped: () => signUserIn(context, _usernameController.text,
+                    _passwordController.text),
+              ),
               const SizedBox(
                 height: 15,
               ),
@@ -141,9 +193,18 @@ class LoginPage extends StatelessWidget {
                   const SizedBox(
                     width: 4,
                   ),
-                  const Text(
-                    'Register now!',
-                    style: TextStyle(color: Colors.blue, fontSize: 16),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SignUpPage(),
+                          ));
+                    },
+                    child: const Text(
+                      'Register now!',
+                      style: TextStyle(color: Colors.blue, fontSize: 16),
+                    ),
                   ),
                 ],
               ),
