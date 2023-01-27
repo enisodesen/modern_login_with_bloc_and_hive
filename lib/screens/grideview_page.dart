@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:modern_login_page/screens/todo.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:modern_login_page/screens/todoPage/cubit/cubit/todo_cubit.dart';
+import 'package:modern_login_page/screens/todoPage/view/todo.dart';
 import 'package:modern_login_page/screens/user_list.dart';
 
 import '../widgets/custom_container.dart';
@@ -56,7 +58,10 @@ class _GrideViewPageState extends State<GrideViewPage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const UserList(),
+                        builder: (context) => BlocProvider(
+                          create: (context) => TodoCubit(),
+                          child: const TodoPage(),
+                        ),
                       ));
                 },
                 color: Colors.yellow.shade700,
